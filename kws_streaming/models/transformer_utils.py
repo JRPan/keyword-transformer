@@ -15,14 +15,16 @@
 # Vision transformer implementation based on https://github.com/tuvovan/Vision_Transformer_Keras/blob/master/vit.py
 
 import tensorflow as tf
-import tensorflow_addons as tfa
+# import tensorflow_addons as tfa
 from tensorflow.keras.layers import (
     Dense,
     Dropout,
     BatchNormalization,
     LayerNormalization,
 )
-from tensorflow.keras.layers.experimental.preprocessing import Rescaling
+# from tensorflow.keras.layers.experimental.preprocessing import Rescaling
+from tensorflow.keras.activations import gelu
+from tensorflow.keras.layers import Activation
 
 from tensorflow.keras.initializers import Zeros, Ones, TruncatedNormal, Constant
 from tensorflow.python.ops import math_ops
@@ -87,7 +89,7 @@ class TransformerBlock(tf.keras.layers.Layer):
         self.ffn = tf.keras.Sequential(
             [
                 Dense(ff_dim, kernel_initializer=TruncatedNormal(mean=0., stddev=TRUNC_STD), bias_initializer=Zeros()),
-                tfa.layers.GELU(approximate=approximate_gelu),
+                tf.keras.layers.Activation(gelu),
                 Dense(embed_dim, kernel_initializer=TruncatedNormal(mean=0., stddev=TRUNC_STD), bias_initializer=Zeros()),
             ]
         )
@@ -140,8 +142,17 @@ class KWSTransformer(tf.keras.Model):
 
         additional_tokens = 2 if distill_token else 1
         self.pos_emb = self.add_weight(
-            "pos_emb", shape=(1, num_patches + additional_tokens, d_model), initializer=TruncatedNormal(mean=0., stddev=TRUNC_STD))
-        self.class_emb = self.add_weight("class_emb", shape=(1, 1, d_model), initializer=TruncatedNormal(mean=0., stddev=TRUNC_STD))
+            name="pos_emb",  # Specify 'name' explicitly as a keyword argument
+            shape=(1, num_patches + additional_tokens, d_model),  # Provide the shape
+            initializer=tf.keras.initializers.TruncatedNormal(mean=0., stddev=TRUNC_STD),  # Ensure initializer is valid
+            trainable=True  # Optional: explicitly mark the weight as trainable
+        )
+        self.class_emb = self.add_weight(
+            name="class_emb",  # Specify 'name' explicitly
+            shape=(1, 1, d_model),  # Provide the correct shape
+            initializer=tf.keras.initializers.TruncatedNormal(mean=0., stddev=TRUNC_STD),  # Ensure initializer is valid
+            trainable=True  # Optional: explicitly mark the weight as trainable
+        )
         self.distill_emb = self.add_weight("distill_emb", shape=(1, 1, d_model), initializer=TruncatedNormal(mean=0., stddev=TRUNC_STD)) if distill_token else None
         self.patch_proj = Dense(d_model, kernel_initializer=TruncatedNormal(mean=0., stddev=TRUNC_STD), bias_initializer=Zeros(), input_shape=(98,40,))
 
@@ -183,7 +194,7 @@ class KWSTransformer(tf.keras.Model):
         x = x + self.pos_emb
 
         for layer in self.enc_layers:
-            x, _ = layer(x, training)
+            x, _ = layer(x, training=training)
 
         # First (class token) is used for classification, second for distillation (if enabled)
         class_output = x[:, 0]

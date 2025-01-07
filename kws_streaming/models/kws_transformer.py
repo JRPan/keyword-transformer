@@ -23,7 +23,7 @@ from kws_streaming.models import utils
 
 from kws_streaming.models.transformer_utils import KWSTransformer
 
-import tensorflow_addons as tfa
+# import tensorflow_addons as tfa
 
 from tensorflow.keras.layers import (
     Dense,

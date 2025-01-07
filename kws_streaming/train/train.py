@@ -30,7 +30,7 @@ import pprint
 from absl import logging
 import numpy as np
 import tensorflow.compat.v1 as tf
-import tensorflow_addons as tfa
+# import tensorflow_addons as tfa
 import kws_streaming.data.input_data as input_data
 from kws_streaming.models import models
 from kws_streaming.models import utils
@@ -109,12 +109,7 @@ def train(flags):
   elif flags.optimizer == 'momentum':
     optimizer = tf.keras.optimizers.SGD(momentum=0.9)
   elif flags.optimizer == 'novograd':
-    optimizer = tfa.optimizers.NovoGrad(
-        lr=0.05,
-        beta_1=flags.novograd_beta_1,
-        beta_2=flags.novograd_beta_2,
-        weight_decay=flags.novograd_weight_decay,
-        grad_averaging=bool(flags.novograd_grad_averaging))
+    exit('NovoGrad not supported')
   elif flags.optimizer == 'adamw':
     # Exclude some layers for weight decay
     exclude = ["pos_emb", "class_emb", "layer_normalization", "bias"]

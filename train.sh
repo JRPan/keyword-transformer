@@ -22,7 +22,7 @@ $CMD_TRAIN \
 --warmup_epochs 10 \
 --l2_weight_decay 0.1 \
 --learning_rate '0.001' \
---batch_size 512 \
+--batch_size 768 \
 --label_smoothing 0.1 \
 --window_size_ms 30.0 \
 --window_stride_ms 10.0 \
@@ -39,8 +39,8 @@ $CMD_TRAIN \
 --pick_deterministically 1 \
 kws_transformer \
 --num_layers 12 \
---heads 3 \
---d_model 192 \
---mlp_dim 768 \
+--heads 1 \
+--d_model 64 \
+--mlp_dim 256 \
 --dropout1 0. \
 --attention_type 'time' \

@@ -81,7 +81,7 @@ class SpecAugment(tf.keras.layers.Layer):
 
   def call(self, inputs, training=None):
     if training is None:
-      training = tf.keras.backend.learning_phase()
+      training = True
 
     def masked_inputs():
       # in time dim
